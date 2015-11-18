@@ -17,6 +17,7 @@ public class user_facts {
 
     public void add_same_fact(String id , double CF){
         this.AU.add(new antecedent_user(id,CF));
+        calculate_CF();
     }
     public void calculate_CF(){
         if(AU.size()==1){
@@ -44,8 +45,9 @@ public class user_facts {
     
     public void print_antecedents(){
         for(int i = 0; i<this.AU.size();i++){
-            System.out.print(this.AU.get(i).id +" "+this.AU.get(i).CF);
+            System.out.print(this.AU.get(i).id +" CF:"+this.AU.get(i).CF+" ");
         }
+        System.out.print(" CF total:"+get_CF());
         System.out.println();
     }
     

@@ -71,7 +71,6 @@ public class Rule {
                 UF.add_same_fact(consequence_id, this.CFuser);
                 WM.put(consequence_id,UF);
                 } 
-            WM.get(consequence_id).calculate_CF();
             evaluated = true;
         }
         return WM;
@@ -83,7 +82,25 @@ public class Rule {
     
     public void print_antecedent(){
         for (int i = 0 ; i<antecedents.size();i++){
-            System.out.print(antecedents.get(i).not+" "+antecedents.get(i).id+" "+antecedents.get(i).connector+" ");
+            String not;
+            String connector;
+            if(antecedents.get(i).not == 0){
+                not = "";
+            }else{
+                not = "not";
+            }
+            if(antecedents.get(i).connector == 0){
+                connector = "AND";
+            }else{
+                connector = "OR";
+            }
+            if(i == 0){
+                 System.out.print(not+" "+antecedents.get(i).id+" ");
+            }else{
+               
+                System.out.print(connector+" "+not+" "+antecedents.get(i).id+" ");
+            }   
         }
+        System.out.print("THEN: "+consequence_id  +" CF :"+CF);
     }
 }

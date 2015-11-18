@@ -6,7 +6,10 @@
 package front_end;
 
 import baylung.user_facts;
+import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -381,10 +384,7 @@ public class MainSyptom2 extends javax.swing.JFrame {
         }else{
              WM = insert.insert(WM, "36", -1);
         }
-        if(infiltratenone.isSelected()){
-             WM = insert.insert(WM, "36", -1);
-             WM = insert.insert(WM, "20", -1);
-        }
+        
         
         //Rib Gap widened?
         double MBRib = insert.text_input(RibMB.getText());
@@ -413,7 +413,7 @@ public class MainSyptom2 extends javax.swing.JFrame {
         //lung scars?
         double MBChest = insert.text_input(ChestMB.getText());
         double MDChest = insert.text_input(ChestMD.getText());
-        WM = insert.insert(WM, "49", insert.CFcalculate(MBChest, MDChest));
+        WM = insert.insert(WM, "51", insert.CFcalculate(MBChest, MDChest));
         
         //roncthen layout
         if(Rontchenwhite.isSelected()){
@@ -422,25 +422,17 @@ public class MainSyptom2 extends javax.swing.JFrame {
              WM = insert.insert(WM, "40", -1);
         }
         
-        if(Rontchenwhite.isSelected()){
-             WM = insert.insert(WM, "40", 1);
-        }else{
-             WM = insert.insert(WM, "40", -1);
-        }
         
         if(Ronchtenblack.isSelected()){
              WM = insert.insert(WM, "44", 1);
         }else{
              WM = insert.insert(WM, "44", -1);
         }
-        if(rontchennormal.isSelected()){
-             WM = insert.insert(WM, "44", -1);
-             WM = insert.insert(WM, "40", -1);
-        }
+        
         if(diaphyes.isSelected()){
              WM = insert.insert(WM, "50", 1);
         }else{
-              WM = insert.insert(WM, "50", 1);
+              WM = insert.insert(WM, "50", -1);
         }
         
         double idealweight;
@@ -464,7 +456,14 @@ public class MainSyptom2 extends javax.swing.JFrame {
             System.out.println();
         }
         
-        Result res = new Result();
+        Result res = null;
+        try {
+            res = new Result();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(MainSyptom2.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(MainSyptom2.class.getName()).log(Level.SEVERE, null, ex);
+        }
         res.WM = this.WM;
         res.setVisible(true);
         this.setVisible(false);

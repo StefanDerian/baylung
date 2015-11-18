@@ -1219,7 +1219,7 @@ public class MainSyptom extends javax.swing.JFrame {
         }
         
         //colour mucus
-        if(Colourpure.isSelected()){
+        if(Colourunpure.isSelected()){
             WM = insert.insert(WM, "19", 1);
         }else{
             WM = insert.insert(WM, "19", -1);
@@ -1353,7 +1353,7 @@ public class MainSyptom extends javax.swing.JFrame {
         if(respirationDoub  < 26){
             WM = insert.insert(WM, "12", 1);
         }else{
-            WM = insert.insert(WM, "12", 1);
+            WM = insert.insert(WM, "12", -1);
         }
         double MBWheezing = insert.text_input(WheezingMB.getText());
         double MDWheezing = insert.text_input(WheezingMD.getText());

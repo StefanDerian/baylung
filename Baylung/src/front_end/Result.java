@@ -5,19 +5,25 @@
  */
 package front_end;
 
+import baylung.ruleProcess;
 import baylung.user_facts;
+import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.sql.*;
 
 /**
  *
  * @author Benny
  */
 public class Result extends javax.swing.JFrame {
-    HashMap<String,user_facts> WM = new HashMap<String,user_facts>();
+     private static Connection koneksi;
+     HashMap<String,user_facts> WM = new HashMap<String,user_facts>();
     /**
      * Creates new form Result
      */
-    public Result() {
+    public Result() throws ClassNotFoundException, SQLException {
         initComponents();
     }
 
@@ -31,29 +37,103 @@ public class Result extends javax.swing.JFrame {
     private void initComponents() {
 
         Title = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         Title.setText("Title");
+
+        jButton1.setText("jButton1");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(417, 417, 417)
-                .addComponent(Title)
-                .addContainerGap(490, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(417, 417, 417)
+                        .addComponent(Title))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(375, 375, 375)
+                        .addComponent(jButton1)))
+                .addContainerGap(470, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(Title)
-                .addContainerGap(495, Short.MAX_VALUE))
+                .addGap(89, 89, 89)
+                .addComponent(jButton1)
+                .addContainerGap(377, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        // TODO add your handling code here:
+        ruleProcess rp = new ruleProcess();
+        
+        rp.set_hashmap(WM);
+        rp.print_WM();
+         try {
+             rp.set_rules();
+         } catch (ClassNotFoundException ex) {
+             Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+         } catch (SQLException ex) {
+             Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+         }
+        rp.infer();
+        System.out.println();
+        rp.print_WM();
+        String result = rp.get_max_CF();
+         try {
+             Class.forName("com.mysql.jdbc.Driver");
+            try {
+                koneksi = DriverManager.getConnection("jdbc:mysql://localhost:3306/baylung","root","");
+            } catch (SQLException ex) {
+                Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+            }
+             
+         } catch (ClassNotFoundException ex) {
+             Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+         }
+        Statement state = null;
+         try {
+             state = koneksi.createStatement();
+         } catch (SQLException ex) {
+             Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         try {
+             ResultSet ruleResult = state.executeQuery("SELECT * FROM linguistic_variable WHERE id_linguistic ="+result+" LIMIT 1");
+             String label = "";
+             if (ruleResult.next()){
+                label = ruleResult.getString("linguistic_name");
+            }
+             Title.setText(label);
+         } catch (SQLException ex) {
+             Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+         }
+        
+        
+        
+    }//GEN-LAST:event_formWindowOpened
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -85,12 +165,24 @@ public class Result extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Result().setVisible(true);
+                try {
+                    new Result().setVisible(true);
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SQLException ex) {
+                    Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                
+                
+                
+                
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Title;
+    private javax.swing.JButton jButton1;
     // End of variables declaration//GEN-END:variables
 }
