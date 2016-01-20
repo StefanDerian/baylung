@@ -49,7 +49,7 @@ public class ruleProcess {
                     antecedent aantecedent = new antecedent(antecedents_id,not,connector);
                     antecedent_list.add(aantecedent);
                 }
-                Rule arule = new Rule(CF,antecedent_list,consequence_id); 
+                Rule arule = new Rule(rule_id,CF,antecedent_list,consequence_id); 
                 if(rules.containsKey(consequence_id)){
                     rules.get(consequence_id).add(arule);
                 }else{
@@ -83,6 +83,7 @@ public class ruleProcess {
         return result;
         
     }
+ 
     public void print_WM(){
         for(String WMkey:WM.keySet()){
             WM.get(WMkey).print_antecedents();
@@ -103,7 +104,9 @@ public class ruleProcess {
                 if(!singleRule.get(i).evaluated){
                     WM = singleRule.get(i).calculateUser(WM);
                     if(singleRule.get(i).evaluated){
-                        
+                        if(!singleRule.get(i).sure){
+                            continue;
+                        }
                         infer();
                         repeat = true;
                         break;

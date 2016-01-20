@@ -374,65 +374,65 @@ public class MainSyptom2 extends javax.swing.JFrame {
         
         //infiltrate is it spreaded ,none ,or gathered
         if(infiltratespread.isSelected()){
-             WM = insert.insert(WM, "20", 1);
+             WM = insert.insert(WM, "20", 1,true);
         }else{
-             WM = insert.insert(WM, "20", -1);
+             WM = insert.insert(WM, "20", -1,true);
         }
         
         if(infiltrategathered.isSelected()){
-             WM = insert.insert(WM, "36", 1);
+             WM = insert.insert(WM, "36", 1,true);
         }else{
-             WM = insert.insert(WM, "36", -1);
+             WM = insert.insert(WM, "36", -1,true);
         }
         
         
         //Rib Gap widened?
         double MBRib = insert.text_input(RibMB.getText());
         double MDRib = insert.text_input(RibMD.getText());
-        WM = insert.insert(WM, "29", insert.CFcalculate(MBRib, MDRib));
+        WM = insert.insert(WM, "29", insert.CFcalculate(MBRib, MDRib),true);
         
         //lung lengthwise?
         double MBLength = insert.text_input(LengthMB.getText());
         double MDLength = insert.text_input(LengthMD.getText());
-        WM = insert.insert(WM, "22", insert.CFcalculate(MBLength, MDLength));
+        WM = insert.insert(WM, "22", insert.CFcalculate(MBLength, MDLength),true);
         
         //fluid in pleura
         if(pleurayes.isSelected()){
-             WM = insert.insert(WM, "41", 1);
+             WM = insert.insert(WM, "41", 1,true);
         }else{
-             WM = insert.insert(WM, "41", -1);
+             WM = insert.insert(WM, "41", -1,true);
         }
         
         //chest scar
         if(chestYes.isSelected()){
-             WM = insert.insert(WM, "43", 1);
+             WM = insert.insert(WM, "43", 1,true);
         }else{
-             WM = insert.insert(WM, "43", -1);
+             WM = insert.insert(WM, "43", -1,true);
         }
         
         //lung scars?
         double MBChest = insert.text_input(ChestMB.getText());
         double MDChest = insert.text_input(ChestMD.getText());
-        WM = insert.insert(WM, "51", insert.CFcalculate(MBChest, MDChest));
+        WM = insert.insert(WM, "51", insert.CFcalculate(MBChest, MDChest),true);
         
         //roncthen layout
         if(Rontchenwhite.isSelected()){
-             WM = insert.insert(WM, "40", 1);
+             WM = insert.insert(WM, "40", 1,true);
         }else{
-             WM = insert.insert(WM, "40", -1);
+             WM = insert.insert(WM, "40", -1,true);
         }
         
         
         if(Ronchtenblack.isSelected()){
-             WM = insert.insert(WM, "44", 1);
+             WM = insert.insert(WM, "44", 1,true);
         }else{
-             WM = insert.insert(WM, "44", -1);
+             WM = insert.insert(WM, "44", -1,true);
         }
         
         if(diaphyes.isSelected()){
-             WM = insert.insert(WM, "50", 1);
+             WM = insert.insert(WM, "50", 1,true);
         }else{
-              WM = insert.insert(WM, "50", -1);
+              WM = insert.insert(WM, "50", -1,true);
         }
         
         double idealweight;
@@ -442,9 +442,9 @@ public class MainSyptom2 extends javax.swing.JFrame {
             idealweight = 45.5+(2.3*(Double.parseDouble(height.getText())/4));
         }
         if(Double.parseDouble(weight.getText())<idealweight -(idealweight *(30/100)) ){
-            WM = insert.insert(WM, "38", 1);
+            WM = insert.insert(WM, "38", 1,true);
         }else{
-            WM = insert.insert(WM, "38", -1);
+            WM = insert.insert(WM, "38", -1,true);
         }
         
         System.out.println();

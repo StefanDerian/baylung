@@ -6,6 +6,7 @@
 package baylung;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 
 /**
@@ -26,6 +27,14 @@ public class Baylung {
             ruleProcess RP = new ruleProcess();
             RP.set_rules();
             RP.print_rules();
+            Random r = new Random();
+            for(int i = 0 ;i <10;i++){
+                
+                System.out.print(Math.abs(r.nextDouble())+" ");
+            }
+            
+            
+            
     } catch (ClassNotFoundException e) {
     // TODO Auto-generated catch block
         e.printStackTrace();

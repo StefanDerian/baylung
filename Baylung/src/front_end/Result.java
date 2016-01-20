@@ -7,24 +7,34 @@ package front_end;
 
 import baylung.ruleProcess;
 import baylung.user_facts;
+import baylung.Explanation_facilty;
+import java.awt.CardLayout;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.sql.*;
+import java.util.ArrayList;
+import panel.detailation;
 
 /**
  *
  * @author Benny
  */
 public class Result extends javax.swing.JFrame {
-     private static Connection koneksi;
-     HashMap<String,user_facts> WM = new HashMap<String,user_facts>();
-    /**
+    private static Connection koneksi;
+    HashMap<String,user_facts> WM = new HashMap<String,user_facts>();
+    Explanation_facilty EP = new Explanation_facilty();
+    ArrayList<detailation> disease_detail = new ArrayList<detailation>();
+    int cardsize = 0;
+    int current = 0;
+    CardLayout cl;
+     /**
      * Creates new form Result
      */
     public Result() throws ClassNotFoundException, SQLException {
         initComponents();
+        
     }
 
     /**
@@ -37,7 +47,12 @@ public class Result extends javax.swing.JFrame {
     private void initComponents() {
 
         Title = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        detail = new javax.swing.JLabel();
+        diseaseCard = new javax.swing.JPanel();
+        previous = new javax.swing.JButton();
+        next = new javax.swing.JButton();
+        jTextField1 = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -48,34 +63,69 @@ public class Result extends javax.swing.JFrame {
 
         Title.setText("Title");
 
-        jButton1.setText("jButton1");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        detail.setText("detail");
+
+        diseaseCard.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        diseaseCard.setLayout(new java.awt.CardLayout());
+
+        previous.setText("prev");
+        previous.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                previousActionPerformed(evt);
             }
         });
+
+        next.setText("next");
+        next.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nextActionPerformed(evt);
+            }
+        });
+
+        jTextField1.setText("jTextField1");
+
+        jLabel2.setText("budget available");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(diseaseCard, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(417, 417, 417)
+                        .addGap(404, 404, 404)
                         .addComponent(Title))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(375, 375, 375)
-                        .addComponent(jButton1)))
-                .addContainerGap(470, Short.MAX_VALUE))
+                        .addGap(74, 74, 74)
+                        .addComponent(detail)))
+                .addContainerGap(503, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(85, 85, 85)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(previous)
+                .addGap(18, 18, 18)
+                .addComponent(next)
+                .addGap(146, 146, 146))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(Title)
-                .addGap(89, 89, 89)
-                .addComponent(jButton1)
-                .addContainerGap(377, Short.MAX_VALUE))
+                .addGap(13, 13, 13)
+                .addComponent(detail)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(diseaseCard, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(previous)
+                    .addComponent(next)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
+                .addGap(10, 10, 10))
         );
 
         pack();
@@ -125,15 +175,45 @@ public class Result extends javax.swing.JFrame {
          } catch (SQLException ex) {
              Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
          }
-        
-        
+         
+         try {
+             EP.get_diseases();
+         } catch (ClassNotFoundException ex) {
+             Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+         } catch (SQLException ex) {
+             Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         detail.setText(EP.print_disease(WM));
+         try {
+             addCard();
+         } catch (SQLException ex) {
+             Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+         } catch (ClassNotFoundException ex) {
+             Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
+         }
         
     }//GEN-LAST:event_formWindowOpened
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void addCard() throws SQLException, ClassNotFoundException{
+        ArrayList<String> diseaseids = EP.getDiseaseIdList(WM);
+        for(int i = 0 ; i <diseaseids.size();i++){
+            
+            diseaseCard.add(new detailation(diseaseids.get(i),WM));
+           
+        }
+        cl = (CardLayout) (diseaseCard.getLayout());
+    }
+    
+    private void previousActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previousActionPerformed
         // TODO add your handling code here:
+        cl.previous(diseaseCard);
         
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_previousActionPerformed
+
+    private void nextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextActionPerformed
+        // TODO add your handling code here:
+        cl.previous(diseaseCard);
+    }//GEN-LAST:event_nextActionPerformed
 
     /**
      * @param args the command line arguments
@@ -167,15 +247,12 @@ public class Result extends javax.swing.JFrame {
             public void run() {
                 try {
                     new Result().setVisible(true);
+                    
                 } catch (ClassNotFoundException ex) {
                     Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (SQLException ex) {
                     Logger.getLogger(Result.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                
-                
-                
-                
                 
             }
         });
@@ -183,6 +260,11 @@ public class Result extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Title;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel detail;
+    private javax.swing.JPanel diseaseCard;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JTextField jTextField1;
+    private javax.swing.JButton next;
+    private javax.swing.JButton previous;
     // End of variables declaration//GEN-END:variables
 }

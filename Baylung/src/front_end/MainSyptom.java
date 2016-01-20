@@ -1156,9 +1156,9 @@ public class MainSyptom extends javax.swing.JFrame {
         
         //bloody cough?
         if(yesblood.isSelected()){
-            WM = insert.insert(WM,"37",1);
+            WM = insert.insert(WM,"37",1,true);
         }else{
-            WM = insert.insert(WM,"37",-1);
+            WM = insert.insert(WM,"37",-1,true);
         }
         if (yescough.isSelected()){
             //calculate the certainty of frequent cough
@@ -1174,17 +1174,17 @@ public class MainSyptom extends javax.swing.JFrame {
             }else{
                 MDfreq = Double.parseDouble(freqMD.getText());
             }
-            WM = insert.insert(WM, "11", insert.CFcalculate(MBfreq, MDfreq));
+            WM = insert.insert(WM, "11", insert.CFcalculate(MBfreq, MDfreq),true);
         
             //howlong?
             if(weeks.getText() != " " && Integer.parseInt(weeks.getText())>= 2){
-                WM = insert.insert(WM, "35", insert.CFcalculate(MBfreq, MDfreq));
+                WM = insert.insert(WM, "35", insert.CFcalculate(MBfreq, MDfreq),true);
             }else{
-                WM = insert.insert(WM, "35", 0);
+                WM = insert.insert(WM, "35", 0,true);
             }
         }else{
-            WM = insert.insert(WM, "35", -1);
-            WM = insert.insert(WM, "11", -1);
+            WM = insert.insert(WM, "35", -1,true);
+            WM = insert.insert(WM, "11", -1,true);
         }
         
         
@@ -1206,54 +1206,54 @@ public class MainSyptom extends javax.swing.JFrame {
             }else{
                 MDmuch = Double.parseDouble(muchMD.getText());
             }
-            WM = insert.insert(WM, "16", insert.CFcalculate(MBmuch, MDmuch));
+            WM = insert.insert(WM, "16", insert.CFcalculate(MBmuch, MDmuch),true);
         }else{
-            WM = insert.insert(WM, "16", -1);  
+            WM = insert.insert(WM, "16", -1,true);  
         }
         
         //sticky mucus?
         if(stickyyes.isSelected()){
-            WM = insert.insert(WM, "13", 1);
+            WM = insert.insert(WM, "13", 1,true);
         }else{
-            WM = insert.insert(WM, "13", -1);
+            WM = insert.insert(WM, "13", -1,true);
         }
         
         //colour mucus
         if(Colourunpure.isSelected()){
-            WM = insert.insert(WM, "19", 1);
+            WM = insert.insert(WM, "19", 1,true);
         }else{
-            WM = insert.insert(WM, "19", -1);
+            WM = insert.insert(WM, "19", -1,true);
         }
         
         //BTAcheck
         if(BTACheckbox.isSelected()){
             if(morningpositive.isSelected()){
-                WM = insert.insert(WM, "31", 1);
+                WM = insert.insert(WM, "31", 1,true);
             }else{
-                WM = insert.insert(WM, "31", -1);
+                WM = insert.insert(WM, "31", -1,true);
             }
             if(firstBTApositive.isSelected()){
-                WM = insert.insert(WM, "32", 1);
+                WM = insert.insert(WM, "32", 1,true);
             }else{
-                WM = insert.insert(WM, "32", -1);
+                WM = insert.insert(WM, "32", -1,true);
             }
             if(secondPositive.isSelected()){
-                WM = insert.insert(WM, "33", 1);
+                WM = insert.insert(WM, "33", 1,true);
             }else{
-                WM = insert.insert(WM, "33", -1);
+                WM = insert.insert(WM, "33", -1,true);
             }
         }else{
-            WM = insert.insert(WM, "31", -1);
-            WM = insert.insert(WM, "32", -1);
-            WM = insert.insert(WM, "33", -1);
+            WM = insert.insert(WM, "31", -1,true);
+            WM = insert.insert(WM, "32", -1,true);
+            WM = insert.insert(WM, "33", -1,true);
         }
         
         //temperature measurement
         
         if(temperature.getText() != "" && Double.parseDouble(temperature.getText())>=37){
-            WM = insert.insert(WM, "6", 1);
+            WM = insert.insert(WM, "6", 1,true);
         }else{
-            WM = insert.insert(WM, "6", -1);
+            WM = insert.insert(WM, "6", -1,true);
         }
         
         //pain in the body?
@@ -1269,7 +1269,7 @@ public class MainSyptom extends javax.swing.JFrame {
         }else{
             MDpain = Double.parseDouble(painMD.getText());
          }
-        WM = insert.insert(WM, "47", insert.CFcalculate(MBpain, MDpain));
+        WM = insert.insert(WM, "47", insert.CFcalculate(MBpain, MDpain),true);
         
         //sore throat?
         double MBsore;
@@ -1284,7 +1284,7 @@ public class MainSyptom extends javax.swing.JFrame {
         }else{
             MDsore = Double.parseDouble(soreMD.getText());
          }
-        WM = insert.insert(WM, "7", insert.CFcalculate(MBsore, MDsore));
+        WM = insert.insert(WM, "7", insert.CFcalculate(MBsore, MDsore),true);
         
         //loss appetite?
         
@@ -1300,83 +1300,83 @@ public class MainSyptom extends javax.swing.JFrame {
         }else{
             MDlossApt = Double.parseDouble(lossAptMD.getText());
         }
-        WM = insert.insert(WM, "8", insert.CFcalculate(MBlossApt, MDlossApt));
+        WM = insert.insert(WM, "8", insert.CFcalculate(MBlossApt, MDlossApt),true);
         
         //headache
         double MBheadache = insert.text_input(headacheMB.getText());
         double MDheadache = insert.text_input(headacheMD.getText());
-        WM = insert.insert(WM, "5", insert.CFcalculate(MBheadache, MDheadache));
+        WM = insert.insert(WM, "5", insert.CFcalculate(MBheadache, MDheadache),true);
         
         //rash on skin?
         double MBrash = insert.text_input(rashMB.getText());
         double MDrash = insert.text_input(rashMD.getText());
-        WM = insert.insert(WM, "9", insert.CFcalculate(MBrash, MDrash));
+        WM = insert.insert(WM, "9", insert.CFcalculate(MBrash, MDrash),true);
         
         //alergy
         if(alergyItchy.isSelected()){
-            WM = insert.insert(WM, "1", 1);
+            WM = insert.insert(WM, "1", 1,true);
         }else{
-             WM = insert.insert(WM, "1", -1);
+             WM = insert.insert(WM, "1", -1,true);
         }
         
         if(alergySneezee.isSelected()){
-            WM = insert.insert(WM, "2", 1);
+            WM = insert.insert(WM, "2", 1,true);
         }else{
-             WM = insert.insert(WM, "2", -1);
+             WM = insert.insert(WM, "2", -1,true);
         }
         
         if(alergyCough.isSelected()){
-            WM = insert.insert(WM, "46", 1);
+            WM = insert.insert(WM, "46", 1,true);
         }else{
-             WM = insert.insert(WM, "46", -1);
+             WM = insert.insert(WM, "46", -1,true);
         }
         
         //smoke often?
         double MBsmoke = insert.text_input(smokeMB.getText());
         double MDsmoke = insert.text_input(smokeMD.getText());
-        WM = insert.insert(WM, "26", insert.CFcalculate(MBsmoke, MDsmoke));
+        WM = insert.insert(WM, "26", insert.CFcalculate(MBsmoke, MDsmoke),true);
         
         //polution
         double MBpolution = insert.text_input(polutionMB.getText());
         double MDpolution = insert.text_input(polutionMD.getText());
-        WM = insert.insert(WM, "49", insert.CFcalculate(MBpolution, MDpolution));
+        WM = insert.insert(WM, "49", insert.CFcalculate(MBpolution, MDpolution),true);
         
         //mask
         if(polutionyes.isSelected()){
-             WM = insert.insert(WM, "48", 1);
+             WM = insert.insert(WM, "48", 1,true);
         }else{
-             WM = insert.insert(WM, "48", -1);
+             WM = insert.insert(WM, "48", -1,true);
         }
         
         //difficulty of brathing
         double respirationDoub = insert.text_input(respiration.getText());
         if(respirationDoub  < 26){
-            WM = insert.insert(WM, "12", 1);
+            WM = insert.insert(WM, "12", 1,true);
         }else{
-            WM = insert.insert(WM, "12", -1);
+            WM = insert.insert(WM, "12", -1,true);
         }
         double MBWheezing = insert.text_input(WheezingMB.getText());
         double MDWheezing = insert.text_input(WheezingMD.getText());
-        WM = insert.insert(WM, "10", insert.CFcalculate(MBWheezing, MDWheezing));
+        WM = insert.insert(WM, "10", insert.CFcalculate(MBWheezing, MDWheezing),true);
         
         //Hipersonor?
         
         if(Sonoryes.isSelected()){
-             WM = insert.insert(WM, "23", 1);
+             WM = insert.insert(WM, "23", 1,true);
         }else{
-             WM = insert.insert(WM, "23", -1);
+             WM = insert.insert(WM, "23", -1,true);
         }
         
         //ancestor
         if(asthmaAnc.isSelected()){
-             WM = insert.insert(WM, "15", 1);
+             WM = insert.insert(WM, "15", 1,true);
         }else{
-             WM = insert.insert(WM, "15", -1);
+             WM = insert.insert(WM, "15", -1,true);
         }
         if(bronAncestor.isSelected()){
-             WM = insert.insert(WM, "17", 1);
+             WM = insert.insert(WM, "17", 1,true);
         }else{
-             WM = insert.insert(WM, "17", -1);
+             WM = insert.insert(WM, "17", -1,true);
         }
         
         

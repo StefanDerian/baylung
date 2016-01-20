@@ -12,8 +12,12 @@ package baylung;
 public class antecedent_user {
     public String id;
     public Double CF;
-    public antecedent_user(String id ,Double CF){
+    public String from_rule;
+    boolean sure;
+    public antecedent_user(String id ,Double CF, String Rule, boolean sure){
         this.id = id;
         this.CF = CF;
+        this.from_rule = Rule;
+        this.sure = sure;
     }
 }

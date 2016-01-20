@@ -23,13 +23,13 @@ public class insertion {
             return Double.parseDouble(input);
         }
     }
-    public HashMap<String,user_facts> insert(HashMap<String,user_facts> WM,String id, double CF){
+    public HashMap<String,user_facts> insert(HashMap<String,user_facts> WM,String id, double CF,boolean sure){
         
         if(WM.containsKey(id)){
-            WM.get(id).add_same_fact(id, CF);
+            WM.get(id).add_same_fact(id, CF,"",sure);
         }else{
             user_facts UF = new user_facts();
-            UF.add_same_fact(id, CF);
+            UF.add_same_fact(id, CF,"",sure);
             WM.put(id, UF);
         }
         return WM;

@@ -16,10 +16,13 @@ public class Rule {
     boolean evaluated = false;
     ArrayList <antecedent> antecedents;
     double CF;
+    boolean sure = true;
     String consequence_id;
     double CFuser = 0;
-    public Rule(double CF ,ArrayList <antecedent> antecedents, String consequence_id ){
+    String rule_id;
+    public Rule(String rule_id,double CF ,ArrayList <antecedent> antecedents, String consequence_id ){
         this.CF = CF;
+        this.rule_id = rule_id;
         this.antecedents = antecedents;
         this.consequence_id = consequence_id;
     }
@@ -33,20 +36,29 @@ public class Rule {
         return this.consequence_id;
     }
     public HashMap<String,user_facts> calculateUser(HashMap<String,user_facts>WM){
+       
         Double CFCombined = 0.0;
         for(int i = 0 ; i<antecedents.size();i++){
             
             if(i == 0){
                  if(WM.containsKey(antecedents.get(i).id)){
+                    if(!WM.get(antecedents.get(i).id).scan_sureness()){
+                        sure = false;
+                    }
                     CFCombined = WM.get(antecedents.get(i).id).CF;
                 }else{
+                    sure = false;
                     CFCombined = 0.0 ;
                 }
             }else{
                 double CFCalc;
                 if(WM.containsKey(antecedents.get(i).id)){
+                     if(!WM.get(antecedents.get(i).id).scan_sureness()){
+                        sure = false;
+                     }
                     CFCalc = WM.get(antecedents.get(i).id).CF;
                 }else{
+                    sure = false;
                     CFCalc = 0.0 ;
                 }
                 if(antecedents.get(i).not == 1){
@@ -62,16 +74,19 @@ public class Rule {
         }
         this.CFuser = CFCombined*CF;
         if(this.CFuser != 0){
-                
+            if(sure){
+                evaluated = true;
+            }   
             if(WM.containsKey(consequence_id)){
-                WM.get(consequence_id).add_same_fact(consequence_id, this.CFuser);
+                WM.get(consequence_id).add_same_fact(consequence_id, this.CFuser,rule_id,sure);
                     
             }else{
                 user_facts UF = new user_facts();
-                UF.add_same_fact(consequence_id, this.CFuser);
+                UF.add_same_fact(consequence_id,this.CFuser,rule_id,sure);
                 WM.put(consequence_id,UF);
-                } 
-            evaluated = true;
+                }
+           
+            
         }
         return WM;
     }
