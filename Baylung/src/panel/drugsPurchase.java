@@ -4,19 +4,85 @@
  * and open the template in the editor.
  */
 package panel;
-
+import ga.*;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import javax.swing.table.DefaultTableModel;
 /**
  *
  * @author Benny
  */
-public class drugsPurchase extends javax.swing.JPanel {
+public final class drugsPurchase extends javax.swing.JPanel {
 
     /**
      * Creates new form drugsPurchase
      */
-    public drugsPurchase() {
+    ArrayList<generic_medicine> GM;
+    double budget;
+   
+    
+    int limit = 0 ;
+    ArrayList<HashMap<String, String>> patentData = new ArrayList<HashMap<String, String>>();
+    public drugsPurchase(ArrayList<generic_medicine> GM,double budget,int limit) throws ClassNotFoundException, SQLException {
         initComponents();
+       
+        
+        this.budget = budget;
+        this.GM = GM;
+        this.limit = limit;
+        operation o = new operation(this.GM,this.budget,this.limit);
+        chrom result = o.iteration();
+        for(int i = 0 ; i < result.index.size();i++){
+            HashMap<String,String> patentDatum = new HashMap<String,String>();
+            patentDatum.put("name", result.PM.get(i).get(result.index.get(i)).patent_name);
+            patentDatum.put("generic_name", result.PM.get(i).get(result.index.get(i)).generic_name);
+            patentDatum.put("price", String.valueOf(result.PM.get(i).get(result.index.get(i)).patent_price));
+            patentDatum.put("explaination", result.PM.get(i).get(result.index.get(i)).patentExplaination);
+            this.patentData.add(patentDatum);
+        }
+        patentPane.setText(buildPatentDrugsHTML(this.patentData));
+        totalPrice.setText(String.valueOf(result.fitness_function));
+        
     }
+public String buildPatentDrugsHTML(ArrayList<HashMap<String,String>> diseaseData){
+        String tag = "<html>";
+        tag += "<H1>Suggested Patent Drug: </H1>";
+        tag+="<table border = '2px'>";
+        tag+="<tr>"
+                +"<td>"
+                +"<b>Name</b>"
+                + "</td>"
+                +"<td>"
+                +"<b>Generic Name</b>"
+                + "</td>"
+                +"<td>"
+                +"<b>Price</b>"
+                + "</td>"
+                +"<td>"
+                +"<b>Explaination</b>"
+                + "</td>"
+                + "</tr>";
+        for(int i = 0; i < diseaseData.size();i++){
+            tag+="<tr>";
+            tag+="<td>";
+            tag+=diseaseData.get(i).get("name");
+            tag+="</td>";
+            tag+="<td>";
+            tag+=diseaseData.get(i).get("generic_name");
+            tag+="</td>";
+            tag+="<td>";
+            tag+=diseaseData.get(i).get("price");
+            tag+="</td>";
+            tag+="<td>";
+            tag+=diseaseData.get(i).get("explaination");
+            tag+="</td>";
+            tag+="</tr>";
+        }
+        tag+="</table>";
+        tag+="</html>";
+        return tag;
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -27,39 +93,56 @@ public class drugsPurchase extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jLabel1 = new javax.swing.JLabel();
+        totalPrice = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        patentPane = new javax.swing.JTextPane();
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        jScrollPane1.setViewportView(jTable1);
+        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        jLabel1.setText("total Price");
+
+        totalPrice.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        totalPrice.setText("price");
+
+        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        jLabel2.setText("Rp.");
+
+        patentPane.setContentType("text/html"); // NOI18N
+        jScrollPane2.setViewportView(patentPane);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 946, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(totalPrice)
+                .addContainerGap(706, Short.MAX_VALUE))
+            .addComponent(jScrollPane2)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 25, Short.MAX_VALUE))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(totalPrice)
+                    .addComponent(jLabel2))
+                .addGap(30, 30, 30))
         );
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextPane patentPane;
+    private javax.swing.JLabel totalPrice;
     // End of variables declaration//GEN-END:variables
 }

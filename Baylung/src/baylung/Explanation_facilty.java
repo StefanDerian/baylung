@@ -15,6 +15,7 @@ import java.util.HashMap;
 public class Explanation_facilty {
     public HashMap<String,String> diseases = new HashMap<String,String>();
     public HashMap<String,String> diagnosstic = new HashMap<String,String>();
+    public ArrayList<String>diseaseListed = new ArrayList<String>(); 
     private static Connection koneksi;
     public void get_diseases() throws ClassNotFoundException, SQLException{
          Class.forName("com.mysql.jdbc.Driver");
@@ -32,6 +33,7 @@ public class Explanation_facilty {
             ResultSet diagnosticResult = state2.executeQuery("SELECT * FROM linguistic_variable WHERE type = 'diagnostic'");
             while(diseaseResult.next()){
                 diseases.put(diseaseResult.getString("id_linguistic"),diseaseResult.getString("linguistic_name") ); 
+                
             }
             while(diagnosticResult.next()){
                 diagnosstic.put(diagnosticResult.getString("id_linguistic"),diagnosticResult.getString("linguistic_name") ); 
@@ -45,6 +47,7 @@ public class Explanation_facilty {
            if(WM.containsKey(diseasekey)){
                if(WM.get(diseasekey).CF > 0){
                     disease_ids.add(diseasekey);
+                    diseaseListed.add(diseases.get(diseasekey)+"("+WM.get(diseasekey).CF+")");
                }
            }   
         }
