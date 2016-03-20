@@ -21,6 +21,9 @@ public class adminFrame extends javax.swing.JFrame {
         initComponents();
         
         adminPane.addTab("Linguistic", new editLinguistic());
+        adminPane.addTab("Question", new Editquestion());
+        adminPane.addTab("Rules", new Rules());
+        adminPane.addTab("Drugs", new Drugs());
     }
 
     /**
@@ -49,11 +52,11 @@ public class adminFrame extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(adminPane)
+            .addComponent(adminPane, javax.swing.GroupLayout.DEFAULT_SIZE, 767, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(adminPane)
+            .addComponent(adminPane, javax.swing.GroupLayout.DEFAULT_SIZE, 601, Short.MAX_VALUE)
         );
 
         pack();

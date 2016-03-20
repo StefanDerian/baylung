@@ -1351,6 +1351,9 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="respiration">
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="respirationActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel31">
           <Properties>
@@ -1378,7 +1381,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel37">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Sonor"/>
+            <Property name="text" type="java.lang.String" value="HiperSonor"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JRadioButton" name="Sonoryes">

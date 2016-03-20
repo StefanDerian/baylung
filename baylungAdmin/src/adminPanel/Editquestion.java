@@ -5,6 +5,19 @@
  */
 package adminPanel;
 
+import Object.Linguistic;
+import Object.question;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author Benny
@@ -14,8 +27,61 @@ public class Editquestion extends javax.swing.JPanel {
     /**
      * Creates new form Editquestion
      */
-    public Editquestion() {
+    DefaultTableModel model;
+    DefaultComboBoxModel referenceAddModel;
+    DefaultComboBoxModel referenceEditModel;
+    private static Connection koneksi;
+    ArrayList<question> questionList = new ArrayList<question>();
+    ArrayList<Linguistic> linguisticAddList = new ArrayList<Linguistic>();
+    ArrayList<Linguistic> linguisticEditList = new ArrayList<Linguistic>();
+    
+    int editReferenceNumber = 0;
+    public Editquestion() throws ClassNotFoundException, SQLException {
         initComponents();
+        String[] columnNames = {"Question", "Type", "Answering"};
+        model = new DefaultTableModel();
+        referenceAddModel = new DefaultComboBoxModel();
+        referenceEditModel = new DefaultComboBoxModel();
+        model.setColumnIdentifiers(columnNames);
+        questionTable.setModel(model);
+        referenceAdd.setModel(referenceAddModel);
+        referenceEdit.setModel(referenceEditModel);
+         Class.forName("com.mysql.jdbc.Driver");
+        koneksi = DriverManager.getConnection("jdbc:mysql://localhost:3306/baylung","root","");
+        
+       if(koneksi == null){
+            System.out.print("not konek");
+        }else{
+             System.out.print("konek");
+        }
+         Statement state = koneksi.createStatement();
+         ResultSet questionResult = state.executeQuery("SELECT * FROM question q JOIN linguistic_variable l on q.linguistic_id = l.id_linguistic  ORDER BY id_question ASC");
+         while(questionResult.next()){
+             String id = questionResult.getString("id_question");
+             String question = questionResult.getString("question");
+             String type = questionResult.getString("type");
+             if(questionResult.getString("type").equals("1") ){
+                 type = "CF";
+             }else{
+                 type = "Yes/no";
+             }
+             String linguistic_name = questionResult.getString("linguistic_name");
+             String linguistic_id = questionResult.getString("linguistic_id");
+             model.addRow(new Object[]{question,type,linguistic_name});
+             this.questionList.add(new question(id,question,type,linguistic_name,linguistic_id));
+         }
+         questionResult.close();
+         ResultSet referenceResult = state.executeQuery("SELECT * FROM linguistic_variable WHERE id_linguistic NOT IN(SELECT linguistic_id FROM question) and type = 'diagnostic' and id_linguistic>59  ORDER BY id_linguistic ASC");
+         while(referenceResult.next()){
+             String id = referenceResult.getString("id_linguistic");
+             String linguistic_name = referenceResult.getString("linguistic_name");
+             String type = referenceResult.getString("type");
+             referenceAddModel.addElement(referenceResult.getString("linguistic_name"));
+             referenceEditModel.addElement(referenceResult.getString("linguistic_name"));
+             this.linguisticAddList.add(new Linguistic(id,linguistic_name,type,""));
+             this.linguisticEditList.add(new Linguistic(id,linguistic_name,type,""));
+         }
+         editReferenceNumber = referenceEditModel.getSize();
     }
 
     /**
@@ -27,19 +93,467 @@ public class Editquestion extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabel4 = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        Add = new javax.swing.ButtonGroup();
+        Edit = new javax.swing.ButtonGroup();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        questionTable = new javax.swing.JTable();
+        jSeparator1 = new javax.swing.JSeparator();
+        jSeparator2 = new javax.swing.JSeparator();
+        delete = new javax.swing.JButton();
+        referenceEdit = new javax.swing.JComboBox();
+        referenceAdd = new javax.swing.JComboBox();
+        yesnoadd = new javax.swing.JRadioButton();
+        CFadd = new javax.swing.JRadioButton();
+        CFedit = new javax.swing.JRadioButton();
+        yesnoedit = new javax.swing.JRadioButton();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        questionAdd = new javax.swing.JTextArea();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        questionEdit = new javax.swing.JTextArea();
+        reference = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        edit = new javax.swing.JButton();
+        add = new javax.swing.JButton();
+
+        jLabel4.setText("Answer To");
+
+        jLabel1.setText("Question");
+
+        questionTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Question", "Type", "Answering"
+            }
+        ));
+        questionTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                questionTableMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(questionTable);
+
+        jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
+
+        delete.setText("Delete");
+        delete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteActionPerformed(evt);
+            }
+        });
+
+        referenceEdit.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        referenceEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                referenceEditActionPerformed(evt);
+            }
+        });
+
+        referenceAdd.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "CF", "Yes/No" }));
+
+        Add.add(yesnoadd);
+        yesnoadd.setText("Yes/No");
+
+        Add.add(CFadd);
+        CFadd.setText("CF");
+
+        Edit.add(CFedit);
+        CFedit.setText("CF");
+
+        Edit.add(yesnoedit);
+        yesnoedit.setText("Yes/No");
+
+        jLabel2.setText("Type");
+
+        jLabel3.setText("Answer To");
+
+        jLabel5.setText("Type");
+
+        jLabel6.setText("Question");
+
+        questionAdd.setColumns(20);
+        questionAdd.setLineWrap(true);
+        questionAdd.setRows(5);
+        jScrollPane2.setViewportView(questionAdd);
+
+        questionEdit.setColumns(20);
+        questionEdit.setLineWrap(true);
+        questionEdit.setRows(5);
+        jScrollPane3.setViewportView(questionEdit);
+
+        reference.setText("Answer To");
+
+        jLabel7.setText("Question");
+
+        edit.setText("Edit");
+        edit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editActionPerformed(evt);
+            }
+        });
+
+        add.setText("Add");
+        add.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(73, 73, 73)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel5)
+                            .addComponent(reference)
+                            .addComponent(jLabel6))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(referenceAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(CFadd)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(yesnoadd))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(42, 42, 42)
+                        .addComponent(add, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(edit, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel7))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(referenceEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(CFedit)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(yesnoedit))
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(163, 163, 163))
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(32, 32, 32)
+                .addComponent(delete, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(45, 45, 45)
+                .addComponent(delete, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(36, 36, 36)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel6))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel5)
+                                .addComponent(CFadd)
+                                .addComponent(yesnoadd))
+                            .addContainerGap())
+                        .addComponent(jSeparator2))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel7))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(CFedit)
+                                    .addComponent(yesnoedit)
+                                    .addComponent(jLabel2))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel3)
+                                    .addComponent(referenceEdit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(23, 23, 23)
+                                .addComponent(edit, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(44, 44, 44))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(reference)
+                                    .addComponent(referenceAdd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addComponent(add, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(50, 50, 50))))))
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteActionPerformed
+        // TODO add your handling code here:
+        int selectedRow = questionTable.getSelectedRow();
+        Statement state = null;
+        Statement lingState = null;
+        if(selectedRow < 0 ){
+            
+        }else{
+            try {
+            state = koneksi.createStatement();
+            lingState = koneksi.createStatement();
+            } catch (SQLException ex) {
+            Logger.getLogger(editLinguistic.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+            int insertedLinguistic2 = state.executeUpdate("DELETE FROM question WHERE id_question = "+questionList.get(questionTable.getSelectedRow()).id);      
+            
+            ResultSet ling = lingState.executeQuery("SELECT * FROM linguistic_variable WHERE id_linguistic = "+questionList.get(questionTable.getSelectedRow()).linguistic_id);
+            
+            while(ling.next()){
+                linguisticAddList.add(new Linguistic(ling.getString("id_linguistic"),ling.getString("linguistic_name"),ling.getString("type"),""));
+                linguisticEditList.add(new Linguistic(ling.getString("id_linguistic"),ling.getString("linguistic_name"),ling.getString("type"),""));
+                referenceAddModel.addElement(ling.getString("linguistic_name"));
+                referenceEditModel.addElement(ling.getString("linguistic_name"));
+            }
+            questionList.remove(selectedRow);
+            ling.close();
+            state.close();
+            lingState.close();
+            if(this.editReferenceNumber<referenceEditModel.getSize()){
+                referenceEditModel.removeElementAt(referenceEditModel.getSize() - 1 );
+            }
+            this.editReferenceNumber = referenceEditModel.getSize();
+            model.removeRow(selectedRow);
+            
+            
+            
+            } catch (SQLException ex) {
+            Logger.getLogger(editLinguistic.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        
+    }//GEN-LAST:event_deleteActionPerformed
+
+    private void referenceEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_referenceEditActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_referenceEditActionPerformed
+
+    private void questionTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_questionTableMouseClicked
+        // TODO add your handling code here:
+        int selectedRow = questionTable.getSelectedRow();
+        int checkNumberRow = referenceEditModel.getSize();
+        
+        if(checkNumberRow > editReferenceNumber){
+            referenceEditModel.removeElementAt(checkNumberRow-1);
+        }
+        
+        
+        String question = questionList.get(selectedRow).question;
+        String type = questionList.get(selectedRow).type;
+        questionEdit.setText(question);
+        if(type == "CF"){
+            CFedit.setSelected(true);
+        }else{
+            yesnoedit.setSelected(true);
+        }
+        
+        referenceEditModel.addElement(model.getValueAt(selectedRow,2));
+        referenceEdit.setSelectedItem(model.getValueAt(selectedRow,2));
+        
+    }//GEN-LAST:event_questionTableMouseClicked
+
+    private void editActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editActionPerformed
+        // TODO add your handling code here:
+        Statement state = null;
+        String question = questionEdit.getText();
+        String type = "";
+        String collumnType = "";
+        String reference = referenceEdit.getSelectedItem().toString();
+        
+        
+       
+        try {
+            state = koneksi.createStatement();
+        } catch (SQLException ex) {
+            Logger.getLogger(editLinguistic.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if(CFedit.isSelected()){
+            type = "1";
+            collumnType = "CF";
+        }else{
+            type = "2";
+            collumnType = "yesno";
+        }
+        if (referenceEdit.getSelectedIndex() == referenceEditModel.getSize()-1){
+            int tableIndex = questionTable.getSelectedRow();
+            
+            try {
+            int updatedQuestion2 = state.executeUpdate("UPDATE question SET "
+                    + "question = '"+question+"',type ='"+type+"'"
+                    + " WHERE id_question ='"+questionList.get(questionTable.getSelectedRow()).id+"'"
+                    ,state.RETURN_GENERATED_KEYS);
+            ResultSet insertedQuestion = state.getGeneratedKeys();
+            questionList.get(tableIndex).updateQuestion(question, type,"","");
+            
+            model.setValueAt(question,questionTable.getSelectedRow() , 0);
+            model.setValueAt(collumnType,questionTable.getSelectedRow() , 1);
+            model.setValueAt(reference,questionTable.getSelectedRow() ,2);
+            state.close();
+            insertedQuestion.close();
+            
+            
+            
+            
+            } catch (SQLException ex) {
+            Logger.getLogger(editLinguistic.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }else{
+            int tableIndex = questionTable.getSelectedRow();
+            String linguisticId = linguisticEditList.get(referenceEdit.getSelectedIndex()).id;
+            try {
+            int updatedQuestion2 = state.executeUpdate("UPDATE question SET "
+                    + "question = '"+question+"',type ='"+type+"'"
+                    +",linguistic_id ='"+linguisticId+"'"
+                    + " WHERE id_question ='"+questionList.get(tableIndex).id+"'"
+                    ,state.RETURN_GENERATED_KEYS);
+            ResultSet insertedQuestion = state.getGeneratedKeys();
+            ResultSet fetchedLinguistic =state.executeQuery("SELECT * FROM linguistic_variable WHERE"
+                    + " id_linguistic ="+linguisticId);
+            linguisticAddList.remove(referenceEdit.getSelectedIndex());
+            linguisticEditList.remove(referenceEdit.getSelectedIndex());
+            
+            while(fetchedLinguistic.next()){
+                Linguistic fLinguistic = new Linguistic(linguisticId,fetchedLinguistic.getString("linguistic_name"),fetchedLinguistic.getString("linguistic_name"),"");
+                linguisticAddList.add(referenceEdit.getSelectedIndex(), fLinguistic);
+                linguisticEditList.add(referenceEdit.getSelectedIndex(), fLinguistic);
+            }
+            referenceAddModel.removeElementAt(referenceEdit.getSelectedIndex());
+            referenceEditModel.removeElementAt(referenceEdit.getSelectedIndex());
+            referenceAddModel.insertElementAt(questionList.get(tableIndex).linguistic_name,referenceEdit.getSelectedIndex());
+            referenceEditModel.insertElementAt(questionList.get(tableIndex).linguistic_name,referenceEdit.getSelectedIndex());
+            
+            
+            questionList.get(tableIndex).updateQuestion(question, type,reference,linguisticEditList.get(referenceEdit.getSelectedIndex()).id);
+            
+            model.setValueAt(question,questionTable.getSelectedRow() , 0);
+            model.setValueAt(collumnType,questionTable.getSelectedRow() , 1);
+            model.setValueAt(reference,questionTable.getSelectedRow() ,2);
+            state.close();
+            insertedQuestion.close();
+            referenceEditModel.removeElementAt(referenceEditModel.getSize()-1);
+            referenceEdit.setSelectedItem(reference);
+            this.editReferenceNumber = referenceEditModel.getSize();
+            
+            
+            
+            } catch (SQLException ex) {
+            Logger.getLogger(editLinguistic.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        
+        
+        
+    }//GEN-LAST:event_editActionPerformed
+
+    private void addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addActionPerformed
+        // TODO add your handling code here:
+        
+        if(referenceAddModel.getSize() == 0){
+            
+        }else{
+            Statement state = null;
+            String question = questionAdd.getText();
+            String Type = "";
+            String typeId = "";
+            int selectedReference = referenceAdd.getSelectedIndex();
+            if(CFadd.isSelected()){
+                Type = "CF";
+                typeId = "1";
+            }else{
+                Type = "yes/no";
+                typeId = "2";
+            }
+            String referenceAnswerId = linguisticAddList.get(selectedReference).id;
+            String referenceAnswerName = linguisticAddList.get(selectedReference).name;
+            try {
+            state = koneksi.createStatement();
+        } catch (SQLException ex) {
+            Logger.getLogger(editLinguistic.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            int insertedQuestion2 = state.executeUpdate("INSERT INTO question (question, type,linguistic_id) "
+                    + " VALUES('"+question+"','"+typeId+"','"+referenceAnswerId+"')",state.RETURN_GENERATED_KEYS);
+            ResultSet insertedQuestion = state.getGeneratedKeys();
+            if (insertedQuestion.next()){
+                
+                questionList.add(new question(insertedQuestion.getString(1),question,typeId,referenceAnswerName,referenceAnswerId));
+               
+            }
+            state.close();
+            insertedQuestion.close();
+            
+            
+            model.insertRow(questionTable.getRowCount(), new Object[]{question,Type,referenceAnswerName});
+            referenceAddModel.removeElementAt(selectedReference);
+            referenceEditModel.removeElementAt(selectedReference);
+            linguisticAddList.remove(selectedReference);
+            linguisticEditList.remove(selectedReference);
+            this.editReferenceNumber = referenceEditModel.getSize();
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(editLinguistic.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        }
+    }//GEN-LAST:event_addActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup Add;
+    private javax.swing.JRadioButton CFadd;
+    private javax.swing.JRadioButton CFedit;
+    private javax.swing.ButtonGroup Edit;
+    private javax.swing.JButton add;
+    private javax.swing.JButton delete;
+    private javax.swing.JButton edit;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JTextArea questionAdd;
+    private javax.swing.JTextArea questionEdit;
+    private javax.swing.JTable questionTable;
+    private javax.swing.JLabel reference;
+    private javax.swing.JComboBox referenceAdd;
+    private javax.swing.JComboBox referenceEdit;
+    private javax.swing.JRadioButton yesnoadd;
+    private javax.swing.JRadioButton yesnoedit;
     // End of variables declaration//GEN-END:variables
 }

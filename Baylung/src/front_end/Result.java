@@ -176,17 +176,20 @@ public class Result extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowOpened
 
     private void addCard() throws SQLException, ClassNotFoundException{
+        
         ArrayList<String> diseaseids = EP.getDiseaseIdList(WM);
         ArrayList<String> diseaseList = EP.diseaseListed;
         DefaultListModel<String> diseaseListModel = new DefaultListModel<>();
         for(int i = 0 ; i <diseaseids.size();i++){
             JScrollPane cardScroll = new JScrollPane(new detailation(diseaseids.get(i),WM));
             cardScrollPanes.add(cardScroll);
+            
             diseaseCard.add(cardScroll);
             diseaseListModel.addElement(diseaseList.get(i));
         }
         diseaseListCon.setModel(diseaseListModel);
         cl = (CardLayout) (diseaseCard.getLayout());
+        
     }
     
     private void diseaseListConValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_diseaseListConValueChanged

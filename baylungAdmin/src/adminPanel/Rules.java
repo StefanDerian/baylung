@@ -5,6 +5,23 @@
  */
 package adminPanel;
 
+import Object.Linguistic;
+import Object.Rule;
+import Object.antecedent;
+import Object.question;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
+
 /**
  *
  * @author Benny
@@ -14,8 +31,83 @@ public class Rules extends javax.swing.JPanel {
     /**
      * Creates new form Rules
      */
-    public Rules() {
+     private static Connection koneksi;
+     ArrayList<Rule> ruleList = new ArrayList<Rule>(); 
+     ArrayList<ArrayList<antecedent>> antecedentList= new ArrayList<ArrayList<antecedent>>();
+     ArrayList<Linguistic> linguisticList = new ArrayList<Linguistic>();
+     DefaultTreeModel TM ;
+     DefaultComboBoxModel linguisticModel = new DefaultComboBoxModel();
+     DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
+    public Rules() throws ClassNotFoundException, SQLException {
         initComponents();
+        TM = (DefaultTreeModel) ruleTree.getModel();
+        TM.setRoot(root);
+        ruleTree.setRootVisible(false);
+       
+        
+        linguisticAdd.setModel(linguisticModel);
+        linguisticEdit.setModel(linguisticModel);
+        
+        Class.forName("com.mysql.jdbc.Driver");
+        koneksi = DriverManager.getConnection("jdbc:mysql://localhost:3306/baylung","root","");
+        
+       if(koneksi == null){
+            System.out.print("not konek");
+        }else{
+             System.out.print("konek");
+        }
+        Statement state = koneksi.createStatement();
+        Statement antecedentState = koneksi.createStatement();
+        ResultSet ruleResult = state.executeQuery("SELECT * FROM `rules` r JOIN linguistic_variable l on l.id_linguistic = r.id_linguistic ");
+        
+        while(ruleResult.next()){
+            DefaultMutableTreeNode child = new DefaultMutableTreeNode(ruleResult.getString("linguistic_name"));
+            
+            ruleList.add(new Rule(
+                    ruleResult.getString("id_rule"),
+                    ruleResult.getString("id_linguistic"),
+                    ruleResult.getString("linguistic_name"),
+                    ruleResult.getString("CF")
+            ));
+            ResultSet antecedentResult = antecedentState.executeQuery("SELECT * FROM `rule_relation` rr JOIN linguistic_variable l ON rr.id_linguistic = l.id_linguistic "
+                    + "where id_rule = "+ruleResult.getString("id_rule"));
+            
+            root.add(child);
+            ArrayList <antecedent> subAntecedentList = new ArrayList<antecedent>();
+            while(antecedentResult.next()){
+               subAntecedentList.add(
+                       new antecedent(
+                            antecedentResult.getString("id_relation"),
+                            antecedentResult.getString("id_linguistic"),
+                            antecedentResult.getString("id_rule"),
+                            antecedentResult.getString("linguistic_name"),
+                            antecedentResult.getString("not"),
+                            antecedentResult.getString("connector")
+                           
+                    )
+               );
+               
+                child.add(new DefaultMutableTreeNode(antecedentResult.getString("linguistic_name")));
+                
+            }
+            antecedentList.add(subAntecedentList);
+        }
+        TM.reload();
+        
+        
+        Statement linguisticState = koneksi.createStatement();
+        ResultSet linguisticResult = linguisticState.executeQuery("SELECT * FROM linguistic_variable");
+        while (linguisticResult.next()){
+            linguisticModel.addElement(linguisticResult.getString("linguistic_name"));
+            linguisticList.add(new Linguistic(
+                    linguisticResult.getString("id_linguistic"),
+                    linguisticResult.getString("linguistic_name"),
+                    "",
+                    ""
+                )
+            );
+            
+        }
     }
 
     /**
@@ -29,8 +121,30 @@ public class Rules extends javax.swing.JPanel {
 
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
+        connectorAdd = new javax.swing.ButtonGroup();
+        connectorEdit = new javax.swing.ButtonGroup();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
+        ruleTree = new javax.swing.JTree();
+        deleteButton = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JSeparator();
+        CFadd = new javax.swing.JTextField();
+        CFEdit = new javax.swing.JTextField();
+        linguisticAdd = new javax.swing.JComboBox();
+        linguisticEdit = new javax.swing.JComboBox();
+        AndAdd = new javax.swing.JRadioButton();
+        orAdd = new javax.swing.JRadioButton();
+        notAdd = new javax.swing.JCheckBox();
+        AndEdit = new javax.swing.JRadioButton();
+        orEdit = new javax.swing.JRadioButton();
+        notEdit = new javax.swing.JCheckBox();
+        edit = new javax.swing.JButton();
+        add = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -45,30 +159,600 @@ public class Rules extends javax.swing.JPanel {
         ));
         jScrollPane2.setViewportView(jTable1);
 
-        jScrollPane1.setViewportView(jTree1);
+        ruleTree.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                ruleTreeMouseClicked(evt);
+            }
+        });
+        ruleTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                ruleTreeValueChanged(evt);
+            }
+        });
+        jScrollPane1.setViewportView(ruleTree);
+
+        deleteButton.setText("Delete");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
+            }
+        });
+
+        linguisticAdd.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        linguisticEdit.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        connectorAdd.add(AndAdd);
+        AndAdd.setText("AND");
+
+        connectorAdd.add(orAdd);
+        orAdd.setText("OR");
+
+        notAdd.setText("Not");
+
+        connectorEdit.add(AndEdit);
+        AndEdit.setText("AND");
+
+        connectorEdit.add(orEdit);
+        orEdit.setText("OR");
+
+        notEdit.setText("Not");
+
+        edit.setText("Edit");
+        edit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editActionPerformed(evt);
+            }
+        });
+
+        add.setText("Add");
+        add.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setText("Linguistic");
+
+        jLabel2.setText("Connector");
+
+        jLabel3.setText("CF");
+
+        jLabel4.setText("Connector");
+
+        jLabel5.setText("Linguistic");
+
+        jLabel6.setText("CF");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(79, 79, 79)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 398, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(172, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel3)
+                                .addGap(65, 65, 65)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(CFadd, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(notAdd)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(AndAdd)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(orAdd))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(24, 24, 24)
+                                .addComponent(linguisticAdd, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 1, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jLabel5))
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel6))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(notEdit)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(AndEdit)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(orEdit))
+                                            .addComponent(CFEdit))
+                                        .addGap(5, 212, Short.MAX_VALUE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(0, 0, Short.MAX_VALUE)
+                                        .addComponent(deleteButton, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(linguisticEdit, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(edit, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(add, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(216, Short.MAX_VALUE))
+            .addComponent(jScrollPane1)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(linguisticAdd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(orAdd)
+                    .addComponent(AndAdd)
+                    .addComponent(jLabel2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(notAdd)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(CFadd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 145, Short.MAX_VALUE)
+                .addComponent(add, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(29, 29, 29)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 11, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(40, 40, 40)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(AndEdit)
+                            .addComponent(orEdit)
+                            .addComponent(jLabel4))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(notEdit)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(CFEdit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel6)))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel5)
+                        .addComponent(linguisticEdit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 49, Short.MAX_VALUE)
+                .addComponent(edit, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(3, 3, 3)
+                .addComponent(deleteButton, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
+        // TODO add your handling code here:
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)ruleTree.getLastSelectedPathComponent();
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) selectedNode.getParent();
+        if(selectedNode.isLeaf() && selectedNode.getParent() !=root ||(selectedNode.getParent() ==root && selectedNode.getChildCount() == 0)){
+            if(selectedNode.getChildCount() > 0 || selectedNode.getParent() !=root){
+                    int nodeIndex = parent.getIndex(selectedNode);
+                    int parentIndex = parent.getParent().getIndex(parent);
+                    Statement state = null;
+                    String ruleId = ruleList.get(parentIndex).id;
+                    String antecedentId = antecedentList.get(parentIndex).get(nodeIndex).id;
+                    try {
+                        state = koneksi.createStatement();
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    try {
+                        state.executeUpdate("DELETE FROM rule_relation "
+                            + "WHERE id_relation = "+ antecedentId);
+                        antecedentList.get(parentIndex).remove(nodeIndex);
+                        TM.removeNodeFromParent(selectedNode);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+            }else{
+                int nodeIndex = parent.getIndex(selectedNode);
+                Statement state = null;
+                Statement relationState = null;
+                String ruleId = ruleList.get(nodeIndex).id;
+                try {
+                    state = koneksi.createStatement();
+                    relationState = koneksi.createStatement();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                try {
+                    state.executeUpdate("DELETE FROM rules "
+                            + "WHERE id_rule = "+ ruleId);
+                    relationState.executeUpdate("DELETE FROM rule_relation "
+                            + "WHERE id_rule = "+ ruleId);
+                    ruleList.remove(nodeIndex);
+                    antecedentList.remove(nodeIndex);
+                    TM.removeNodeFromParent(selectedNode);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+            }
+        
+        
+        }else{
+            int nodeIndex = parent.getIndex(selectedNode);
+            Statement state = null;
+            Statement relationState = null;
+            String ruleId = ruleList.get(nodeIndex).id;
+            try {
+                state = koneksi.createStatement();
+                relationState = koneksi.createStatement();
+            } catch (SQLException ex) {
+                Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                state.executeUpdate("DELETE FROM rules "
+                + "WHERE id_rule = "+ ruleId);
+                relationState.executeUpdate("DELETE FROM rule_relation "
+                + "WHERE id_rule = "+ ruleId);
+                ruleList.remove(nodeIndex);
+                antecedentList.remove(nodeIndex);
+                TM.removeNodeFromParent(selectedNode);
+            } catch (SQLException ex) {
+                        Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_deleteButtonActionPerformed
+
+    private void ruleTreeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ruleTreeMouseClicked
+        // TODO add your handling code here:
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)ruleTree.getLastSelectedPathComponent();
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) selectedNode.getParent();
+        
+        
+        if(selectedNode.isLeaf() && selectedNode.getParent() !=root ||(selectedNode.getParent() ==root && selectedNode.getChildCount() == 0)){
+           CFEdit.setEnabled(false);
+           CFadd.setEnabled(false);
+           AndAdd.setEnabled(true);
+           orAdd.setEnabled(true);
+           notAdd.setEnabled(true);
+           AndEdit.setEnabled(true);
+           orEdit.setEnabled(true);
+           notEdit.setEnabled(true);
+           
+           if(selectedNode.getChildCount() > 0 || selectedNode.getParent() !=root){
+               int nodeIndex = parent.getIndex(selectedNode);
+               int parentIndex = parent.getParent().getIndex(parent);
+               String connector = antecedentList.get(parentIndex).get(nodeIndex).Connector;
+               String not = antecedentList.get(parentIndex).get(nodeIndex).Not;
+               if(connector.equals("0")){
+                    AndEdit.setSelected(true);
+                }else{
+                    orEdit.setSelected(true);
+                }
+                if(not.equals("0")){
+                    notEdit.setSelected(false);
+                }else{
+                    notEdit.setSelected(true);
+                }
+           }else{
+              int nodeIndex = parent.getIndex(selectedNode);
+              String CF = ruleList.get(nodeIndex).CF;
+              CFEdit.setVisible(true);
+              CFEdit.setText(CF);
+              
+              AndEdit.setEnabled(false);
+              orEdit.setEnabled(false);
+              notEdit.setEnabled(false);
+              
+           }
+           
+           
+           
+        }else{
+          CFEdit.setEnabled(true);
+          CFadd.setEnabled(true);
+          AndAdd.setEnabled(false);
+          orAdd.setEnabled(false);
+          notAdd.setEnabled(false);
+          AndEdit.setEnabled(false);
+          orEdit.setEnabled(false);
+          notEdit.setEnabled(false);
+          int nodeIndex = parent.getIndex(selectedNode);
+          String CF = ruleList.get(nodeIndex).CF;
+          CFEdit.setText(CF);
+        }
+        linguisticEdit.setSelectedItem(selectedNode.getUserObject());
+        
+        
+    }//GEN-LAST:event_ruleTreeMouseClicked
+
+    private void addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addActionPerformed
+        // TODO add your handling code here:
+        if(ruleTree.getSelectionCount() == 0){
+            
+        }else{
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)ruleTree.getLastSelectedPathComponent();
+            DefaultMutableTreeNode parent = (DefaultMutableTreeNode) selectedNode.getParent();
+            
+            if(selectedNode.isLeaf() && selectedNode.getParent()!=root ||(selectedNode.getParent() ==root && selectedNode.getChildCount() == 0)){
+                
+                
+                Statement state = null;
+                
+                
+                int selectedAddIndex = linguisticAdd.getSelectedIndex();
+                String linguisticId = linguisticList.get(selectedAddIndex).id;
+                String linguisticName = linguisticList.get(selectedAddIndex).name;
+                
+                String Connector = "";
+                String Not = "";
+                if(AndAdd.isSelected()){
+                    Connector = "0";
+                }else{
+                    Connector = "1";
+                }
+                if(notAdd.isSelected()){
+                    Not = "1";
+                }else{
+                    Not = "0";
+                }
+                if(selectedNode.getChildCount() > 0 || selectedNode.getParent() !=root){
+                    int nodeIndex = parent.getIndex(selectedNode);
+                    int parentIndex = parent.getParent().getIndex(parent);
+                    String ruleId = ruleList.get(parentIndex).id;
+                    try {
+                        state = koneksi.createStatement();
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    try {
+                        int insertedAntecedent2 = state.executeUpdate("INSERT INTO rule_relation (id_linguistic, id_rule, connector, `not`) "
+                            + "VALUES('"+linguisticId+"','"+ruleId+"','"+Connector+"','"+Not+"')",state.RETURN_GENERATED_KEYS);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    ResultSet inserted = null;
+                    try {
+                        inserted = state.getGeneratedKeys();
+                        if (inserted.next()){
+                        antecedentList.get(parentIndex).add(new antecedent(inserted.getString(1),
+                                linguisticId,
+                                ruleId,
+                                linguisticName,
+                                Not,
+                                Connector
+                                )
+                            );
+                        }   
+                        state.close();
+                        inserted.close();
+                    } catch (SQLException ex) {
+                         Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+               
+                
+                
+                    TM.insertNodeInto(new DefaultMutableTreeNode(linguisticAdd.getSelectedItem().toString()), parent, parent.getChildCount());
+                }else{
+                     int nodeIndex = parent.getIndex(selectedNode);
+                     String ruleId = ruleList.get(nodeIndex).id;
+                     try {
+                        state = koneksi.createStatement();
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    try {
+                        int insertedAntecedent2 = state.executeUpdate("INSERT INTO rule_relation (id_linguistic, id_rule, connector, `not`) "
+                            + "VALUES('"+linguisticId+"','"+ruleId+"','"+Connector+"','"+Not+"')",state.RETURN_GENERATED_KEYS);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    ResultSet inserted = null;
+                    try {
+                        inserted = state.getGeneratedKeys();
+                        if (inserted.next()){
+                        antecedentList.get(nodeIndex).add(new antecedent(inserted.getString(1),
+                                linguisticId,
+                                ruleId,
+                                linguisticName,
+                                Not,
+                                Connector
+                                )
+                            );
+                        }   
+                        state.close();
+                        inserted.close();
+                    } catch (SQLException ex) {
+                         Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                    TM.insertNodeInto(new DefaultMutableTreeNode(linguisticAdd.getSelectedItem().toString()), selectedNode,0);
+                }
+                
+                
+            }else{
+               int nodeIndex = parent.getIndex(selectedNode);
+               Statement state = null;
+                
+                
+                int selectedAddIndex = linguisticAdd.getSelectedIndex();
+                String linguisticId = linguisticList.get(selectedAddIndex).id;
+                String linguisticName = linguisticList.get(selectedAddIndex).name;
+                String CF  = CFadd.getText();
+                
+                try {
+                    state = koneksi.createStatement();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                try {
+                    int insertedAntecedent2 = state.executeUpdate("INSERT INTO rules (id_linguistic, CF) "
+                            + "VALUES('"+linguisticId+"','"+CF+"')",state.RETURN_GENERATED_KEYS);
+                } catch (SQLException ex) {
+                    Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                ResultSet inserted = null;
+                try {
+                    inserted = state.getGeneratedKeys();
+                    if (inserted.next()){
+                        ruleList.add(new Rule(inserted.getString(1),
+                                linguisticId,
+                                linguisticName,
+                                CF
+                            )
+                        );
+                    }
+                    antecedentList.add(new ArrayList<antecedent>());
+                    state.close();
+                    inserted.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                }
+               
+                
+                
+                TM.insertNodeInto(new DefaultMutableTreeNode(linguisticAdd.getSelectedItem().toString()), parent, parent.getChildCount());
+                
+            }
+            TM.reload();
+            
+        }
+        
+        
+    }//GEN-LAST:event_addActionPerformed
+
+    private void ruleTreeValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_ruleTreeValueChanged
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_ruleTreeValueChanged
+
+    private void editActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editActionPerformed
+        // TODO add your handling code here:
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)ruleTree.getLastSelectedPathComponent();
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) selectedNode.getParent();   
+        
+        if(selectedNode.isLeaf() && selectedNode.getParent()!=root ||(selectedNode.getParent() ==root && selectedNode.getChildCount() == 0)){
+            int linguisticIndex = linguisticEdit.getSelectedIndex();
+            String liguisticId = linguisticList.get(linguisticIndex).id;
+            String liguisticName = linguisticList.get(linguisticIndex).name;
+            if(selectedNode.getChildCount() > 0 || selectedNode.getParent() !=root){
+                int nodeIndex = parent.getIndex(selectedNode);
+                int parentIndex = parent.getParent().getIndex(parent);
+                String Connector = "";
+                String Not = "";
+                String relationId = antecedentList.get(parentIndex).get(nodeIndex).id;
+                if(AndEdit.isSelected()){
+                    Connector = "0";
+                }else{
+                    Connector = "1";
+                }
+                if(notEdit.isSelected()){
+                    Not = "1";
+                }else{
+                    Not = "0";
+                }
+                Statement state = null;
+                try {
+                    state = koneksi.createStatement();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                try {
+                    state.executeUpdate("UPDATE rule_relation SET id_linguistic = '"+liguisticId+"',"
+                        + "connector = '"+Connector+"',"
+                        + "`not` = '"+Not+"'"
+                        + " WHERE id_relation = "+relationId);
+                    antecedentList.get(parentIndex).get(nodeIndex).updateAntecedent(liguisticId, liguisticName, Not, Connector);
+                    selectedNode.setUserObject(new DefaultMutableTreeNode(liguisticName));
+                    TM.reload(selectedNode);
+                } catch (SQLException ex) {
+                    Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }else{
+                String CF  = CFEdit.getText();
+                int nodeIndex = parent.getIndex(selectedNode);
+                String ruleId = ruleList.get(nodeIndex).id;
+                Statement state = null;
+                try {
+                    state = koneksi.createStatement();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                try {
+                    state.executeUpdate("UPDATE rules SET id_linguistic = '"+liguisticId+"',"
+                        + "CF = '"+CF+"'"
+                        + " WHERE id_rule= "+ruleId);
+                    ruleList.get(nodeIndex).updateRule(liguisticId, liguisticName, CF);
+                    selectedNode.setUserObject(new DefaultMutableTreeNode(liguisticName));
+                    TM.reload(selectedNode);
+                } catch (SQLException ex) {
+                    Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            
+        }else{
+            int nodeIndex = parent.getIndex(selectedNode);
+            String CF  = CFEdit.getText();
+            int linguisticIndex = linguisticEdit.getSelectedIndex();
+            String ruleId = ruleList.get(nodeIndex).id;
+            String liguisticId = linguisticList.get(linguisticIndex).id;
+            String liguisticName = linguisticList.get(linguisticIndex).name;
+            
+            Statement state = null;
+            try {
+                state = koneksi.createStatement();
+            } catch (SQLException ex) {
+                Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                state.executeUpdate("UPDATE rules SET id_linguistic = '"+liguisticId+"',"
+                        + "CF = '"+CF+"'"
+                        + " WHERE id_rule = "+ruleId);
+                ruleList.get(nodeIndex).updateRule(liguisticId, liguisticName, CF);
+                selectedNode.setUserObject(new DefaultMutableTreeNode(liguisticName));
+                TM.reload(selectedNode);
+            } catch (SQLException ex) {
+                Logger.getLogger(Rules.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            
+            
+        }
+        
+        
+        
+    }//GEN-LAST:event_editActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JRadioButton AndAdd;
+    private javax.swing.JRadioButton AndEdit;
+    private javax.swing.JTextField CFEdit;
+    private javax.swing.JTextField CFadd;
+    private javax.swing.JButton add;
+    private javax.swing.ButtonGroup connectorAdd;
+    private javax.swing.ButtonGroup connectorEdit;
+    private javax.swing.JButton deleteButton;
+    private javax.swing.JButton edit;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTree jTree1;
+    private javax.swing.JComboBox linguisticAdd;
+    private javax.swing.JComboBox linguisticEdit;
+    private javax.swing.JCheckBox notAdd;
+    private javax.swing.JCheckBox notEdit;
+    private javax.swing.JRadioButton orAdd;
+    private javax.swing.JRadioButton orEdit;
+    private javax.swing.JTree ruleTree;
     // End of variables declaration//GEN-END:variables
 }

@@ -883,6 +883,12 @@ public class MainSyptom extends javax.swing.JFrame {
 
         jLabel30.setText("respiration");
 
+        respiration.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                respirationActionPerformed(evt);
+            }
+        });
+
         jLabel31.setText("times/minutes");
 
         jLabel35.setText("MD");
@@ -891,7 +897,7 @@ public class MainSyptom extends javax.swing.JFrame {
 
         jLabel36.setText("wheezing");
 
-        jLabel37.setText("Sonor");
+        jLabel37.setText("HiperSonor");
 
         Sonor.add(Sonoryes);
         Sonoryes.setText("yes");
@@ -1350,7 +1356,7 @@ public class MainSyptom extends javax.swing.JFrame {
         
         //difficulty of brathing
         double respirationDoub = insert.text_input(respiration.getText());
-        if(respirationDoub  < 26){
+        if(respirationDoub  < 28){
             WM = insert.insert(WM, "12", 1,true);
         }else{
             WM = insert.insert(WM, "12", -1,true);
@@ -1395,6 +1401,10 @@ public class MainSyptom extends javax.swing.JFrame {
         syp.setVisible(true);
        this.setVisible(false);
     }//GEN-LAST:event_NextActionPerformed
+
+    private void respirationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_respirationActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_respirationActionPerformed
 
     /**
      * @param args the command line arguments

@@ -5,6 +5,22 @@
  */
 package adminPanel;
 
+import Object.Linguistic;
+import Object.Rule;
+import Object.antecedent;
+import Object.drugGeneric;
+import Object.drugPatent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+
 /**
  *
  * @author Benny
@@ -14,8 +30,82 @@ public class Drugs extends javax.swing.JPanel {
     /**
      * Creates new form Drugs
      */
-    public Drugs() {
+    private static Connection koneksi;
+    DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
+    ArrayList<Linguistic>linguisticList = new ArrayList<Linguistic>();
+    ArrayList<drugGeneric>genericList = new ArrayList<drugGeneric>();
+    ArrayList<ArrayList<drugPatent>> patentList = new ArrayList<ArrayList<drugPatent>>();
+    DefaultComboBoxModel diseaseModel = new DefaultComboBoxModel();
+    DefaultTreeModel TM ;
+    public Drugs() throws SQLException, ClassNotFoundException {
         initComponents();
+        TM = (DefaultTreeModel) drugTree.getModel();
+        TM.setRoot(root);
+        drugTree.setRootVisible(false);
+        diseaseAdd.setModel(diseaseModel);
+        diseaseEdit.setModel(diseaseModel);
+        Class.forName("com.mysql.jdbc.Driver");
+        koneksi = DriverManager.getConnection("jdbc:mysql://localhost:3306/baylung","root","");
+        
+       if(koneksi == null){
+            System.out.print("not konek");
+        }else{
+             System.out.print("konek");
+        }
+        Statement state = koneksi.createStatement();
+        Statement antecedentState = koneksi.createStatement();
+        ResultSet genDrugResult = state.executeQuery("SELECT * FROM `drugs` "
+                + "JOIN drug_relation r ON r.id_drug = drugs.id_drug "
+                + "JOIN linguistic_variable l ON r.id_linguistic = l.id_linguistic  ");
+        
+        while(genDrugResult.next()){
+            DefaultMutableTreeNode child = new DefaultMutableTreeNode(genDrugResult.getString("drugname"));
+            
+            genericList.add(new drugGeneric(
+                    genDrugResult.getString("id_drug"),
+                    genDrugResult.getString("drugname"),
+                    genDrugResult.getString("price"),
+                    genDrugResult.getString("rules"),
+                    genDrugResult.getString("id_linguistic"),
+                    genDrugResult.getString("linguistic_name")
+            ));
+            ResultSet patentResult = antecedentState.executeQuery("SELECT * FROM `drug_patent` "
+                    + "where id_generic_drug = "+genDrugResult.getString("id_drug"));
+            
+            root.add(child);
+            ArrayList <drugPatent> subPatentList = new ArrayList<drugPatent>();
+            while(patentResult.next()){
+               subPatentList.add(
+                       new drugPatent(
+                            patentResult.getString("id_drug"),
+                            patentResult.getString("name"),
+                            patentResult.getString("price"),
+                            patentResult.getString("rules")
+                            
+                    )
+               );
+               
+                child.add(new DefaultMutableTreeNode(patentResult.getString("name")));
+                
+            }
+            patentList.add(subPatentList);
+        }
+        TM.reload();
+        
+        
+        Statement linguisticState = koneksi.createStatement();
+        ResultSet linguisticResult = linguisticState.executeQuery("SELECT * FROM linguistic_variable");
+        while (linguisticResult.next()){
+            //linguisticModel.addElement(linguisticResult.getString("linguistic_name"));
+            linguisticList.add(new Linguistic(
+                    linguisticResult.getString("id_linguistic"),
+                    linguisticResult.getString("linguistic_name"),
+                    "",
+                    ""
+                )
+            );
+            
+        }
     }
 
     /**
@@ -27,19 +117,405 @@ public class Drugs extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        drugTree = new javax.swing.JTree();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        ruleAdd = new javax.swing.JList();
+        jSeparator1 = new javax.swing.JSeparator();
+        diseaseAdd = new javax.swing.JComboBox();
+        priceAdd = new javax.swing.JTextField();
+        nameAdd = new javax.swing.JTextField();
+        Add = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        insertRuleAddButton = new javax.swing.JButton();
+        removeRuleAddButton = new javax.swing.JButton();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        insertRuleAdd = new javax.swing.JTextArea();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        nameEdit = new javax.swing.JTextField();
+        Edit = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        insertRuleEditButton = new javax.swing.JButton();
+        removeRuleEditButton = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        ruleEdit = new javax.swing.JList();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        insertRuleEdit = new javax.swing.JTextArea();
+        diseaseEdit = new javax.swing.JComboBox();
+        priceEdit = new javax.swing.JTextField();
+        delete = new javax.swing.JButton();
+
+        drugTree.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                drugTreeMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(drugTree);
+
+        ruleAdd.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane2.setViewportView(ruleAdd);
+
+        diseaseAdd.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        nameAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nameAddActionPerformed(evt);
+            }
+        });
+
+        Add.setText("Add");
+        Add.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AddActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setText("Disease");
+
+        jLabel2.setText("Name");
+
+        jLabel3.setText("Price");
+
+        jLabel4.setText("Rules");
+
+        insertRuleAddButton.setText("<");
+        insertRuleAddButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                insertRuleAddButtonActionPerformed(evt);
+            }
+        });
+
+        removeRuleAddButton.setText(">");
+        removeRuleAddButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeRuleAddButtonActionPerformed(evt);
+            }
+        });
+
+        insertRuleAdd.setColumns(20);
+        insertRuleAdd.setLineWrap(true);
+        insertRuleAdd.setRows(5);
+        jScrollPane4.setViewportView(insertRuleAdd);
+
+        jLabel5.setText("Insert Rules");
+
+        jLabel6.setText("Insert Rules");
+
+        Edit.setText("Edit");
+        Edit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                EditActionPerformed(evt);
+            }
+        });
+
+        jLabel7.setText("Disease");
+
+        jLabel8.setText("Name");
+
+        jLabel9.setText("Price");
+
+        jLabel10.setText("Rules");
+
+        insertRuleEditButton.setText("<");
+        insertRuleEditButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                insertRuleEditButtonActionPerformed(evt);
+            }
+        });
+
+        removeRuleEditButton.setText(">");
+        removeRuleEditButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeRuleEditButtonActionPerformed(evt);
+            }
+        });
+
+        ruleEdit.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane3.setViewportView(ruleEdit);
+
+        insertRuleEdit.setColumns(20);
+        insertRuleEdit.setLineWrap(true);
+        insertRuleEdit.setRows(5);
+        jScrollPane5.setViewportView(insertRuleEdit);
+
+        diseaseEdit.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        delete.setText("Delete");
+        delete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 569, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(Add, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(diseaseAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                    .addComponent(nameAdd, javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                                                    .addComponent(priceAdd, javax.swing.GroupLayout.Alignment.LEADING))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(insertRuleAddButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(removeRuleAddButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(jLabel5)
+                                                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                                .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 536, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(Edit, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING))
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(diseaseEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                .addGroup(layout.createSequentialGroup()
+                                                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(insertRuleEditButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(removeRuleEditButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                                                .addGroup(layout.createSequentialGroup()
+                                                    .addComponent(priceEdit)
+                                                    .addGap(73, 73, 73)))
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addComponent(jLabel6)
+                                                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addComponent(nameEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(30, 30, 30)
+                        .addComponent(delete, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(19, 19, 19)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 523, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 501, Short.MAX_VALUE)
+            .addComponent(jScrollPane1)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(diseaseAdd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addGap(6, 6, 6)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(nameAdd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(priceAdd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel5))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane2)
+                            .addComponent(jLabel4)
+                            .addComponent(jScrollPane4)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(insertRuleAddButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(removeRuleAddButton)
+                        .addGap(101, 101, 101)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(Add, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(diseaseEdit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7))
+                .addGap(6, 6, 6)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(nameEdit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel8))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(priceEdit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel9)
+                            .addComponent(jLabel6))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane3)
+                            .addComponent(jLabel10)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(insertRuleEditButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(removeRuleEditButton)
+                        .addGap(101, 101, 101)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(Edit, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
+                .addComponent(delete, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void insertRuleAddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertRuleAddButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_insertRuleAddButtonActionPerformed
+
+    private void removeRuleAddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeRuleAddButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_removeRuleAddButtonActionPerformed
+
+    private void AddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddActionPerformed
+        // TODO add your handling code here:
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)drugTree.getLastSelectedPathComponent();
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) selectedNode.getParent();
+        if(selectedNode.isLeaf() && selectedNode.getParent() !=root ||(selectedNode.getParent() ==root && selectedNode.getChildCount() == 0)){
+            if(selectedNode.getChildCount() > 0 || selectedNode.getParent() !=root){
+            }else{
+            }
+        }else{
+            
+        
+        }
+    }//GEN-LAST:event_AddActionPerformed
+
+    private void EditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EditActionPerformed
+        // TODO add your handling code here:
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)drugTree.getLastSelectedPathComponent();
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) selectedNode.getParent();
+        if(selectedNode.isLeaf() && selectedNode.getParent() !=root ||(selectedNode.getParent() ==root && selectedNode.getChildCount() == 0)){
+            if(selectedNode.getChildCount() > 0 || selectedNode.getParent() !=root){
+            }else{
+            }
+        }else{
+            
+        
+        }
+    }//GEN-LAST:event_EditActionPerformed
+
+    private void insertRuleEditButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertRuleEditButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_insertRuleEditButtonActionPerformed
+
+    private void removeRuleEditButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeRuleEditButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_removeRuleEditButtonActionPerformed
+
+    private void nameAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameAddActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_nameAddActionPerformed
+
+    private void deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteActionPerformed
+        // TODO add your handling code here:
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)drugTree.getLastSelectedPathComponent();
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) selectedNode.getParent();
+        if(selectedNode.isLeaf() && selectedNode.getParent() !=root ||(selectedNode.getParent() ==root && selectedNode.getChildCount() == 0)){
+            if(selectedNode.getChildCount() > 0 || selectedNode.getParent() !=root){
+            }else{
+            }
+        }else{
+            
+        
+        }
+    }//GEN-LAST:event_deleteActionPerformed
+
+    private void drugTreeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_drugTreeMouseClicked
+        // TODO add your handling code here:
+        DefaultListModel<String> diseaseListModel = new DefaultListModel<>();
+    }//GEN-LAST:event_drugTreeMouseClicked
+
+    public void editPatent(){
+        
+    }
+    public void addPatent(){
+        
+    }
+    public void deletePatent(){
+        
+    }
+    public void addGeneric(){
+        
+    }
+    public void editGeneric(){
+        
+    }
+    public void deleteGeneric(){
+        
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton Add;
+    private javax.swing.JButton Edit;
+    private javax.swing.JButton delete;
+    private javax.swing.JComboBox diseaseAdd;
+    private javax.swing.JComboBox diseaseEdit;
+    private javax.swing.JTree drugTree;
+    private javax.swing.JTextArea insertRuleAdd;
+    private javax.swing.JButton insertRuleAddButton;
+    private javax.swing.JTextArea insertRuleEdit;
+    private javax.swing.JButton insertRuleEditButton;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JTextField nameAdd;
+    private javax.swing.JTextField nameEdit;
+    private javax.swing.JTextField priceAdd;
+    private javax.swing.JTextField priceEdit;
+    private javax.swing.JButton removeRuleAddButton;
+    private javax.swing.JButton removeRuleEditButton;
+    private javax.swing.JList ruleAdd;
+    private javax.swing.JList ruleEdit;
     // End of variables declaration//GEN-END:variables
 }
